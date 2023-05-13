@@ -1,17 +1,15 @@
-use std::net::IpAddr;
 use super::ResultValue;
-
-
+use std::net::IpAddr;
 
 pub enum SPFIdentity {
-  Helo,
-  MailFrom,
+    Helo,
+    MailFrom,
 }
 
 pub struct SPFResult {
-  pub client_ip: IpAddr,
-  pub helo: String,
-  pub sender: String,
-  pub value: ResultValue,
-  pub identity: SPFIdentity,
+    pub client_ip: IpAddr,
+    pub helo: String,
+    pub sender: String,
+    pub value: ResultValue,
+    pub identity: SPFIdentity,
 }

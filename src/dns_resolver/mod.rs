@@ -35,19 +35,16 @@ pub enum ResponseCode {
     Unknown(u16),
 }
 
-
 pub type DNSResolverResult<T> = Result<T, DNSResolverErrorKind>;
 
-
-pub struct  TXTRData {
-    txt_data: Box<[String]>
+pub struct TXTRData {
+    data: Box<[String]>,
 }
 
 pub struct MXRData {
     preference: u16,
     exchange: String,
 }
-
 
 pub trait DNSResolver {
     fn txt_lookup(&self, query: &str) -> DNSResolverResult<Vec<TXTRData>>;

@@ -2,10 +2,6 @@ mod spf;
 
 pub use spf::{SPFIdentity, SPFResult};
 
-
-
-
-
 pub enum ResultValue {
     Unknown,
     None,
@@ -31,5 +27,3 @@ pub enum Method {
     SPF,
     VBR,
 }
-
-

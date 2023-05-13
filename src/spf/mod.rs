@@ -1,24 +1,38 @@
-use std::str::FromStr;
-
+mod r#macro;
+mod mechanism;
+mod parse;
 mod verify;
+
+use std::net::IpAddr;
 
 pub use verify::SPFVerifier;
 
-pub type SPFRecord = Vec<Term>;
+use mechanism::Mechanism;
 
+pub struct SPFRecord(Vec<Term>);
 
-enum Term {
-    Directive,
+pub enum Term {
+    Directive(Directive),
     Modifier,
 }
 
-impl FromStr for SPFRecord {
-    type Err = std::io::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        unimplemented!()
-    }
+pub struct Directive {
+    pub qual: Qualifier,
+    pub mech: Mechanism,
 }
 
+pub enum Qualifier {
+    Pass,
+    Softfail,
+    Neutral,
+    Fail,
+}
 
-impl 
+pub struct SPFContext {
+    pub ip: IpAddr,
+    pub domain: String,
+    pub sender: String,
+    pub helo: String,
+    pub mail_from: String,
+    pub host_name: String,
+}

@@ -42,20 +42,13 @@ impl SPFVerifier {
         let domain = match parts.len() {
             2 => parts[1],
             _ => helo,
-
         };
 
-
-        match self.resolver.txt_lookup(domain) {
-            Err(err) => {}
-            Ok(record) => {}
-        }
-
+        // let txt_record = self.resolver.txt_lookup(domain).unwrap();
 
         unimplemented!()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

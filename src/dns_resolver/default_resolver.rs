@@ -22,5 +22,4 @@ impl DNSResolver for DefaultDNSResolver {
     fn txt_lookup(&self, query: &str) -> super::DNSResolverResult<Vec<super::TXTRData>> {
         unimplemented!()
     }
-    
 }
