@@ -1,5 +1,6 @@
-use std::net::{IpAddr};
 use super::SPFContext;
+use std::net::{IpAddr, Ipv6Addr};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use hex::encode;
 
@@ -52,8 +53,6 @@ impl ToDomainString for MacroString {
         unimplemented!()
     }
 }
-
-
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MacroExpand {
@@ -128,33 +127,54 @@ impl ToDomainString for MacroLetter {
             Self::Domain => ctx.domain.to_owned(),
             Self::IP => match ctx.ip {
                 IpAddr::V4(v4) => v4.to_string(),
-                IpAddr::V6(v6) => {
-                    encode(v6.octets()).chars();
-                    unimplemented!()
-                }
-            }  
-            Self::DomainOfIP => unimplemented!(),   // TODO: Get the PTR of the IP
-            Self::IPVersion => unimplemented!(),
-            _ => "".to_owned(),
+                IpAddr::V6(v6) => v6.get_domain_string(ctx),
+            },
+            Self::DomainOfIP => unimplemented!(), // TODO: Get the PTR of the IP
+            Self::IPVersion => match ctx.ip {
+                IpAddr::V4(_) => "in-addr".to_owned(),
+                IpAddr::V6(_) => "ip6".to_owned(),
+            },
+            Self::HELODomain => ctx.helo.clone(),
+            Self::SMTPClientIP => ctx.ip.to_string(),
+            Self::ReceiverDomain => ctx.host_name.clone(),
+            Self::Timestamp => SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs()
+                .to_string(),
         }
+    }
+}
+
+impl ToDomainString for Ipv6Addr {
+    fn get_domain_string(&self, _ctx: &SPFContext) -> String {
+        let oct_str = encode(self.octets());
+        let mut chars = oct_str.chars();
+        let mut ret = String::with_capacity(oct_str.len() * 2);
+        if let Some(c) = chars.next() {
+            ret.push(c)
+        }
+        for c in chars {
+            ret.push('.');
+            ret.push(c);
+        }
+        ret
     }
 }
 
 #[cfg(test)]
 mod test {
-    use std::net::Ipv6Addr;
     use hex::encode;
-
+    use std::net::Ipv6Addr;
 
     #[test]
     fn test_ipv6_format() {
-        
         let ip = Ipv6Addr::new(0xff, 0x11, 0x12, 0x3e, 0x72, 0x80, 0x01, 0x00);
         let s = encode(ip.octets());
         assert_eq!(s, "00ff00110012003e0072008000010000".to_owned());
 
         let mut chars = s.chars();
-        let mut string  = String::with_capacity(s.len()*2);
+        let mut string = String::with_capacity(s.len() * 2);
         if let Some(c) = chars.next() {
             string.push(c);
         }
@@ -162,6 +182,9 @@ mod test {
             string.push('.');
             string.push(c);
         }
-        assert_eq!(&string, "0.0.f.f.0.0.1.1.0.0.1.2.0.0.3.e.0.0.7.2.0.0.8.0.0.0.0.1.0.0.0.0")
+        assert_eq!(
+            &string,
+            "0.0.f.f.0.0.1.1.0.0.1.2.0.0.3.e.0.0.7.2.0.0.8.0.0.0.0.1.0.0.0.0"
+        )
     }
 }
